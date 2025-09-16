@@ -1,4 +1,4 @@
 # vaulty
 An Azure Keyvault TUI
 
-[Screenshot](vaulty.mov)
+![Screenshot](vaulty.mov)
