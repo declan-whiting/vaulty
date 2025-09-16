@@ -55,8 +55,5 @@ func (ui *Ui) KeyvaultSelectionChanged() *Ui {
 		ui.SecretsView.SetTitle(mainText + "/secrets")
 	})
 
-	// //TODO: hack to populate
-	// ui.KeyvaultView.SetCurrentItem(0)
-
 	return ui
 }
