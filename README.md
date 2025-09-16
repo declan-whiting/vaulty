@@ -28,6 +28,7 @@ make && ./bin/vaulty
 
 # Roadmap
 - Bug fixing
+- Global search
 - Secret modification/deletion
 - Certificates management
 - Keys mananagement
