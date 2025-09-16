@@ -6,7 +6,7 @@
 *.dylib
 
 *bin/cache
-vaulty.conf
+*vaulty.conf
 
 # Test binary, built with `go test -c`
 *.test
