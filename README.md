@@ -23,6 +23,7 @@ Keyvaults:
 3. Build and run the executable
 
 ``` bash
+cd vaulty
 make && ./bin/vaulty
 ```
 
