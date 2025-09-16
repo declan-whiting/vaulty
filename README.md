@@ -1,5 +1,7 @@
 # Vaulty
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/declan-whiting/vaulty)](https://goreportcard.com/report/github.com/declan-whiting/vaulty)
+
 An Azure Keyvault TUI, written in Golang using [tview](https://github.com/rivo/tview/tree/master). 
 
 ![Screenshot](vaulty.gif)
