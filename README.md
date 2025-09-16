@@ -2,6 +2,6 @@
 An Azure Keyvault TUI
 
 
+<img width="800" height="467" alt="image" src="https://github.com/user-attachments/assets/d67946e6-d91f-4cbf-bd72-e4985c12775a" />
 
-https://github.com/user-attachments/assets/b8c5afc6-246f-407b-8c8d-ac607771f645
 
