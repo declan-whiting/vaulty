@@ -10,6 +10,7 @@ Vaulty is under active development and is subject to change.
 
 1. Clone the repository
 2. Update vaulty.conf
+   - You must configure at least one Keyvault. Remove any unused Keyvaults from configuration. 
 
 ``` yaml
 Keyvaults:
