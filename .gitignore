@@ -5,6 +5,7 @@
 *.so
 *.dylib
 
+*bin/
 *bin/cache
 *vaulty.conf
 
