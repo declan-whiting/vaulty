@@ -1,19 +1,17 @@
 package ui
 
 import (
-	"github.com/declan-whiting/vaulty/internal/cache"
-	"github.com/declan-whiting/vaulty/internal/configuration"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
-func NewKeyvaultView() *tview.List {
+func NewKeyvaultView(service Services) *tview.List {
 	list := tview.NewList()
 	list.SetTitle("Keyvaults")
 	list.SetBorder(true)
 	list.ShowSecondaryText(false)
 
-	for i, v := range cache.ReadKeyvaults() {
+	for i, v := range service.CacheService.ReadKeyvaults() {
 		list.AddItem(v.Name, v.SubscriptionId, rune('a'+i), nil)
 	}
 
@@ -38,7 +36,7 @@ func (ui *Ui) AddKeyvaultViewControls() *Ui {
 		return event
 	})
 
-	vault := configuration.GetConfiguration().Keyvaults[0]
+	vault := ui.Services.ConfigrationService.GetConfiguration().Keyvaults[0]
 	ui.CurrentKeyVault.Name = vault.Name
 	ui.CurrentKeyVault.SubscriptionId = vault.SubscriptionId
 	UpdateSecretsView(ui)

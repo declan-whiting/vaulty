@@ -13,24 +13,44 @@ import (
 )
 
 func main() {
-	startUp()
+	configService := configuration.NewConfigurationService()
+	cacheService := cache.NewCacheService(configService)
+	azureService := azure.NewAzureService(cacheService)
+
+	startUp(configService, cacheService, azureService)
+
 	ui.BuildUi()
 }
 
-func startUp() []models.KeyvaultModel {
+type ConfigurationService interface {
+	GetConfiguration() models.ConfigurationList
+}
+
+type CacheService interface {
+	ReadKeyvaults() []models.KeyvaultModel
+	ReadSecrets(string) []models.SecretModel
+	WriteLastSync([]byte)
+}
+
+type AzureService interface {
+	AzShowKeyvault(string, string) models.KeyvaultModel
+	AzGetSecrets(string, string) []models.SecretModel
+}
+
+func startUp(conf ConfigurationService, cache CacheService, azure AzureService) []models.KeyvaultModel {
 	fmt.Printf("Starting vaulty...\n")
 	fmt.Println("Attempting read from cache..")
 	vaults := cache.ReadKeyvaults()
 
 	if vaults == nil {
-		config := configuration.GetConfiguration()
+		config := conf.GetConfiguration()
 		fmt.Printf("No cache found, reading configuration...\n")
 		for _, v := range config.Keyvaults {
 			fmt.Printf("Getting %s from Azure...\n", v.Name)
 			vaults = append(vaults, azure.AzShowKeyvault(v.Name, v.SubscriptionId))
 		}
 
-		writeLastSync()
+		writeLastSync(cache)
 	}
 
 	var wg sync.WaitGroup
@@ -53,12 +73,12 @@ func startUp() []models.KeyvaultModel {
 	}
 	wg.Wait()
 
-	writeLastSync()
+	writeLastSync(cache)
 	fmt.Printf("Finished loading!")
 	return vaults
 }
 
-func writeLastSync() {
+func writeLastSync(cs CacheService) {
 	bytes := []byte(fmt.Sprintf("Last Sync: %s", time.Now().Format(time.ANSIC)))
-	cache.WriteLastSync(bytes)
+	cs.WriteLastSync(bytes)
 }

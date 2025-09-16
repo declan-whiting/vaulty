@@ -20,22 +20,28 @@ type Ui struct {
 	SearchView      *tview.InputField
 	StatusView      *tview.TextView
 	CurrentKeyVault *CurrentKeyVault
+	Services        *Services
 }
 
-func (ui *Ui) Init() *Ui {
+func (ui *Ui) Init(services Services) *Ui {
+	ui.Services = &services
 	ui.CurrentKeyVault = new(CurrentKeyVault)
-	ui.SecretsView = NewSecretsView()
-	ui.KeyvaultView = NewKeyvaultView()
+	ui.SecretsView = NewSecretsView(services)
+	ui.KeyvaultView = NewKeyvaultView(services)
 	ui.ControlsView = NewControlsView()
 	ui.SearchView = NewSearchView()
-	ui.StatusView = NewStatusView()
+	ui.StatusView = NewStatusView(services)
 	ui.App = tview.NewApplication()
+
 	return ui
 }
 
 func BuildUi() {
+	services := Services{}
+	services.Init()
+
 	ui := new(Ui).
-		Init().
+		Init(services).
 		CreateGrid().
 		AddKeyvaultViewControls().
 		AddSecretsControls().

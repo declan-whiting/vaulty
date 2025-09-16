@@ -3,7 +3,6 @@ package ui
 import (
 	"strings"
 
-	"github.com/declan-whiting/vaulty/internal/cache"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -32,7 +31,7 @@ func (ui *Ui) AddSearchControls() *Ui {
 		ui.SecretsView.Clear()
 		i := 0
 
-		for _, v := range cache.ReadSecrets(ui.CurrentKeyVault.Name) {
+		for _, v := range ui.Services.CacheService.ReadSecrets(ui.CurrentKeyVault.Name) {
 			if strings.Contains(strings.ToLower(v.Name), strings.ToLower(text)) {
 				ui.SecretsView.SetCell(i, 0, tview.NewTableCell(v.Name))
 				i++

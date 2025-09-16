@@ -5,17 +5,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/declan-whiting/vaulty/internal/azure"
-	"github.com/declan-whiting/vaulty/internal/cache"
-	"github.com/declan-whiting/vaulty/internal/configuration"
 	"github.com/declan-whiting/vaulty/internal/models"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
-func NewStatusView() *tview.TextView {
+func NewStatusView(service Services) *tview.TextView {
 	statusView := tview.NewTextView()
-	statusView.SetText(cache.ReadLastSync()).SetTextAlign(tview.AlignCenter)
+	statusView.SetText(service.CacheService.ReadLastSync()).SetTextAlign(tview.AlignCenter)
 	statusView.SetBorder(true)
 	statusView.SetTitle("Status")
 
@@ -41,7 +38,7 @@ func (ui *Ui) AddStatusControls() *Ui {
 			}()
 
 			go func() {
-				ui.StatusView.SetText(UpdateFromAzure())
+				ui.StatusView.SetText(UpdateFromAzure(*ui.Services))
 				loading = false
 				ui.App.Draw()
 
@@ -55,14 +52,14 @@ func (ui *Ui) AddStatusControls() *Ui {
 	return ui
 }
 
-func UpdateFromAzure() string {
+func UpdateFromAzure(service Services) string {
 	var vaults []models.KeyvaultModel
 	start := time.Now()
 
-	config := configuration.GetConfiguration()
+	config := service.ConfigrationService.GetConfiguration()
 
 	for _, v := range config.Keyvaults {
-		vaults = append(vaults, azure.AzShowKeyvault(v.Name, v.SubscriptionId))
+		vaults = append(vaults, service.AzureService.AzShowKeyvault(v.Name, v.SubscriptionId))
 	}
 
 	var wg sync.WaitGroup
@@ -70,7 +67,7 @@ func UpdateFromAzure() string {
 	for i, v := range vaults {
 		go func() {
 			defer wg.Done()
-			vaults[i].Secrets = azure.AzGetSecrets(v.Name, v.SubscriptionId)
+			vaults[i].Secrets = service.AzureService.AzGetSecrets(v.Name, v.SubscriptionId)
 		}()
 	}
 	wg.Wait()

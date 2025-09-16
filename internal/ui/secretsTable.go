@@ -3,20 +3,18 @@ package ui
 import (
 	"fmt"
 
-	"github.com/declan-whiting/vaulty/internal/azure"
-	"github.com/declan-whiting/vaulty/internal/cache"
 	"github.com/declan-whiting/vaulty/internal/models"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
-func NewSecretsView() *tview.Table {
+func NewSecretsView(service Services) *tview.Table {
 	keyvault := models.KeyvaultModel{}
 	table := tview.NewTable()
 	table.SetSelectable(true, false)
 	table.SetBorder(true)
 	table.SetTitle("Secrets")
-	for i, v := range cache.ReadSecrets(keyvault.Name) {
+	for i, v := range service.CacheService.ReadSecrets(keyvault.Name) {
 		table.SetCell(i, 0, tview.NewTableCell(v.Name))
 	}
 
@@ -28,7 +26,7 @@ func UpdateSecretsView(ui *Ui) *tview.Table {
 	ui.SecretsView.SetBorder(true)
 	ui.SecretsView.SetTitle("Secrets")
 
-	for i, v := range cache.ReadSecrets(ui.CurrentKeyVault.Name) {
+	for i, v := range ui.Services.CacheService.ReadSecrets(ui.CurrentKeyVault.Name) {
 		ui.SecretsView.SetCell(i, 0, tview.NewTableCell(v.Name))
 	}
 
@@ -63,7 +61,7 @@ func (ui *Ui) SecretSelectedChanged() *Ui {
 		secretsDetailsView := tview.NewTextView()
 		secretsDetailsView.SetTitle(fmt.Sprintf("%s/%s", ui.CurrentKeyVault.Name, secretName))
 		secretsDetailsView.SetBorder(true)
-		secretsDetailsView.SetText(azure.AzShowSecret(secretName, ui.CurrentKeyVault.Name, ui.CurrentKeyVault.SubscriptionId))
+		secretsDetailsView.SetText(ui.Services.AzureService.AzShowSecret(secretName, ui.CurrentKeyVault.Name, ui.CurrentKeyVault.SubscriptionId))
 
 		ui.App.SetFocus(secretsDetailsView)
 

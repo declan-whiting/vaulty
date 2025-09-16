@@ -5,24 +5,22 @@ import (
 	"log"
 	"os"
 
+	"github.com/declan-whiting/vaulty/internal/models"
 	"gopkg.in/yaml.v3"
 )
 
-type ConfigurationList struct {
-	Keyvaults []KeyvaultConfiguration `yaml:"Keyvaults"`
+type ConfigrationService struct{}
+
+func NewConfigurationService() *ConfigrationService {
+	return new(ConfigrationService)
 }
 
-type KeyvaultConfiguration struct {
-	Name           string `yaml:"Name"`
-	SubscriptionId string `yaml:"Subscription"`
-}
-
-func GetConfiguration() ConfigurationList {
+func (cs *ConfigrationService) GetConfiguration() models.ConfigurationList {
 	cacheVaultFile, err := os.Open("vaulty.conf")
 	if err != nil {
 		log.Fatal(err)
 	}
-	var vaults ConfigurationList
+	var vaults models.ConfigurationList
 	out, _ := io.ReadAll(cacheVaultFile)
 
 	err = yaml.Unmarshal(out, &vaults)

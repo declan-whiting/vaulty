@@ -5,13 +5,27 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/declan-whiting/vaulty/internal/cache"
 	"github.com/declan-whiting/vaulty/internal/models"
 )
 
-func AzShowKeyvault(name, subscriptionId string) models.KeyvaultModel {
+type CacheService interface {
+	WriteKeyvault(string, []byte)
+	WriteSecrets(string, []byte)
+}
+
+type AzureService struct {
+	CacheService CacheService
+}
+
+func NewAzureService(cache CacheService) *AzureService {
+	azure := new(AzureService)
+	azure.CacheService = cache
+	return azure
+}
+
+func (az *AzureService) AzShowKeyvault(name, subscriptionId string) models.KeyvaultModel {
 	out, _ := exec.Command("az", "keyvault", "show", "--name", name, "--subscription", subscriptionId, "--output", "json").CombinedOutput()
-	cache.WriteKeyvault(name, out)
+	az.CacheService.WriteKeyvault(name, out)
 	var kv models.KeyvaultModel
 	kv.SubscriptionId = subscriptionId
 	err := json.Unmarshal(out, &kv)
@@ -23,9 +37,9 @@ func AzShowKeyvault(name, subscriptionId string) models.KeyvaultModel {
 	return kv
 }
 
-func AzGetSecrets(name, subscriptionId string) []models.SecretModel {
+func (az *AzureService) AzGetSecrets(name, subscriptionId string) []models.SecretModel {
 	out, _ := exec.Command("az", "keyvault", "secret", "list", "--vault-name", name, "--subscription", subscriptionId, "--output", "json").CombinedOutput()
-	cache.WriteSecrets(name, out)
+	az.CacheService.WriteSecrets(name, out)
 	var response []models.SecretModel
 	err := json.Unmarshal(out, &response)
 	if err != nil {
@@ -36,7 +50,7 @@ func AzGetSecrets(name, subscriptionId string) []models.SecretModel {
 	return response
 }
 
-func AzShowSecret(secretName, vaultName, subscriptionId string) string {
+func (az *AzureService) AzShowSecret(secretName, vaultName, subscriptionId string) string {
 	out, _ := exec.Command("az", "keyvault", "secret", "show", "--vault-name", vaultName, "--name", secretName, "--subscription", subscriptionId, "--output", "json").CombinedOutput()
 	return string(out)
 }
