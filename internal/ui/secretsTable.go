@@ -13,6 +13,7 @@ func NewSecretsView(service Services) *tview.Table {
 	table := tview.NewTable()
 	table.SetSelectable(true, false)
 	table.SetBorder(true)
+
 	table.SetTitle("Secrets")
 	for i, v := range service.CacheService.ReadSecrets(keyvault.Name) {
 		table.SetCell(i, 0, tview.NewTableCell(v.Name))

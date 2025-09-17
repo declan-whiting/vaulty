@@ -10,9 +10,10 @@ func NewKeyvaultView(service Services) *tview.List {
 	list.SetTitle("Keyvaults")
 	list.SetBorder(true)
 	list.ShowSecondaryText(false)
+	list.SetBorderPadding(0, 0, 1, 0)
 
-	for i, v := range service.CacheService.ReadKeyvaults() {
-		list.AddItem(v.Name, v.SubscriptionId, rune('a'+i), nil)
+	for _, v := range service.CacheService.ReadKeyvaults() {
+		list.AddItem(v.Name, v.SubscriptionId, rune(0), nil)
 	}
 
 	return list
@@ -35,7 +36,6 @@ func (ui *Ui) AddKeyvaultViewControls() *Ui {
 		}
 		return event
 	})
-
 	vault := ui.Services.ConfigrationService.GetConfiguration().Keyvaults[0]
 	ui.CurrentKeyVault.Name = vault.Name
 	ui.CurrentKeyVault.SubscriptionId = vault.SubscriptionId

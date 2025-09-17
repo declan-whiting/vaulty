@@ -3,6 +3,7 @@ package ui
 import (
 	"log"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
@@ -40,6 +41,9 @@ func BuildUi() {
 	services := Services{}
 	services.Init()
 
+	theme := NewTheme()
+	tview.Styles = theme.GetTheme()
+
 	ui := new(Ui).
 		Init(services).
 		CreateGrid().
@@ -48,11 +52,21 @@ func BuildUi() {
 		AddSearchControls().
 		AddStatusControls().
 		KeyvaultSelectionChanged().
-		SecretSelectedChanged()
+		SecretSelectedChanged().
+		StyleCustomization(theme)
 
 	ui.App.SetRoot(ui.Grid, true)
 	err := ui.App.SetFocus(ui.KeyvaultView).Run()
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func (ui *Ui) StyleCustomization(theme Theme) *Ui {
+	ui.KeyvaultView.SetSelectedBackgroundColor(theme.GetColor("background"))
+	ui.KeyvaultView.SetSelectedTextColor(theme.GetColor("pink"))
+	ui.SecretsView.SetSelectedStyle(tcell.StyleDefault.
+		Background(theme.GetColor("background")).
+		Foreground(theme.GetColor("pink")))
+	return ui
 }
