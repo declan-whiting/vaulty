@@ -1,4 +1,4 @@
-package ui
+package theme
 
 import (
 	"github.com/gdamore/tcell/v2"
@@ -48,4 +48,13 @@ func (t Theme) GetTheme() tview.Theme {
 	}
 
 	return theme
+}
+
+func (t Theme) SetTableCellTheme(table *tview.Table, row int, col int, foreground, background string) {
+	highlighted := tcell.
+		StyleDefault.
+		Foreground(tcell.GetColor(foreground)).
+		Background(tcell.GetColor(background))
+
+	table.GetCell(row, col).Style = highlighted
 }
