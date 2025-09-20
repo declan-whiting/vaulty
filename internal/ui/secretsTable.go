@@ -96,3 +96,10 @@ func (ui *Ui) NotifyUpdate(content string) {
 func (ui *Ui) NotifyFocus() {
 	ui.App.SetFocus(ui.SecretsView)
 }
+
+func (ui *Ui) CurrentKeyvaultUpdated(name, subscription string) {
+	ui.CurrentKeyVault.Name = name
+	ui.CurrentKeyVault.SubscriptionId = subscription
+	UpdateSecretsView(ui)
+	ui.SecretsView.SetTitle(name + "/secrets")
+}

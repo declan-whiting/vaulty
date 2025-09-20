@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/declan-whiting/vaulty/internal/controls"
+	"github.com/declan-whiting/vaulty/internal/keyvault"
 	"github.com/declan-whiting/vaulty/internal/search"
 	"github.com/declan-whiting/vaulty/internal/theme"
 	"github.com/gdamore/tcell/v2"
@@ -19,7 +20,7 @@ type Ui struct {
 	App             *tview.Application
 	Grid            *tview.Grid
 	ControlsView    *controls.ControlsView
-	KeyvaultView    *tview.List
+	KeyvaultView    *keyvault.KeyvaultView
 	SecretsView     *tview.Table
 	SearchView      *search.SearchView
 	StatusView      *tview.TextView
@@ -28,16 +29,35 @@ type Ui struct {
 }
 
 func (ui *Ui) Init(services Services, themer theme.Theme) *Ui {
+	ui.App = tview.NewApplication()
 	ui.Services = &services
 	ui.CurrentKeyVault = new(CurrentKeyVault)
 	ui.SecretsView = NewSecretsView(services)
-	ui.KeyvaultView = NewKeyvaultView(services)
+
+	ui.KeyvaultView = keyvault.NewKeyvaultView(
+		services.CacheService,
+		services.ConfigrationService,
+		ui.HandleQuit,
+		ui.HandleSearch,
+		ui.HandleKeyvaultSelection)
+
 	ui.ControlsView = controls.NewControlsView(themer)
 	ui.SearchView = search.NewSearchView()
 	ui.StatusView = NewStatusView(services)
-	ui.App = tview.NewApplication()
 
 	return ui
+}
+
+func (ui *Ui) HandleQuit() {
+	ui.App.Stop()
+}
+func (ui *Ui) HandleSearch() {
+	ui.SearchView.SetText("")
+	ui.SecretsView.ScrollToBeginning()
+	ui.App.SetFocus(ui.SearchView)
+}
+func (ui *Ui) HandleKeyvaultSelection() {
+	ui.App.SetFocus(ui.SecretsView)
 }
 
 func BuildUi() {
@@ -50,15 +70,16 @@ func BuildUi() {
 	ui := new(Ui).
 		Init(services, theme).
 		CreateGrid().
-		AddKeyvaultViewControls().
 		AddSecretsControls().
 		AddStatusControls().
-		KeyvaultSelectionChanged().
 		SecretSelectedChanged().
 		StyleCustomization(theme)
 
 	ui.SearchView.AddSearchControls()
 	ui.SearchView.AddObserver(ui)
+
+	ui.KeyvaultView.AddCurrentKeyvaultWatcher(ui)
+	ui.KeyvaultView.SetInitialKeyvault()
 
 	ui.App.SetRoot(ui.Grid, true)
 	err := ui.App.SetFocus(ui.KeyvaultView).Run()
