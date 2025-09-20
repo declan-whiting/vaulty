@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/declan-whiting/vaulty/internal/models"
 	"github.com/gdamore/tcell/v2"
@@ -79,4 +80,19 @@ func (ui *Ui) SecretSelectedChanged() *Ui {
 		ui.Grid.AddItem(secretsDetailsView, 1, 1, 1, 2, 0, 0, false)
 	})
 	return ui
+}
+
+func (ui *Ui) NotifyUpdate(content string) {
+	ui.SecretsView.Clear()
+	i := 0
+	for _, v := range ui.Services.CacheService.ReadSecrets(ui.CurrentKeyVault.Name) {
+		if strings.Contains(strings.ToLower(v.Name), strings.ToLower(content)) {
+			ui.SecretsView.SetCell(i, 0, tview.NewTableCell(v.Name))
+			i++
+		}
+
+	}
+}
+func (ui *Ui) NotifyFocus() {
+	ui.App.SetFocus(ui.SecretsView)
 }

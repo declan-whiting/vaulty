@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/declan-whiting/vaulty/internal/controls"
+	"github.com/declan-whiting/vaulty/internal/search"
 	"github.com/declan-whiting/vaulty/internal/theme"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -20,7 +21,7 @@ type Ui struct {
 	ControlsView    *controls.ControlsView
 	KeyvaultView    *tview.List
 	SecretsView     *tview.Table
-	SearchView      *tview.InputField
+	SearchView      *search.SearchView
 	StatusView      *tview.TextView
 	CurrentKeyVault *CurrentKeyVault
 	Services        *Services
@@ -32,7 +33,7 @@ func (ui *Ui) Init(services Services, themer theme.Theme) *Ui {
 	ui.SecretsView = NewSecretsView(services)
 	ui.KeyvaultView = NewKeyvaultView(services)
 	ui.ControlsView = controls.NewControlsView(themer)
-	ui.SearchView = NewSearchView()
+	ui.SearchView = search.NewSearchView()
 	ui.StatusView = NewStatusView(services)
 	ui.App = tview.NewApplication()
 
@@ -51,11 +52,13 @@ func BuildUi() {
 		CreateGrid().
 		AddKeyvaultViewControls().
 		AddSecretsControls().
-		AddSearchControls().
 		AddStatusControls().
 		KeyvaultSelectionChanged().
 		SecretSelectedChanged().
 		StyleCustomization(theme)
+
+	ui.SearchView.AddSearchControls()
+	ui.SearchView.AddObserver(ui)
 
 	ui.App.SetRoot(ui.Grid, true)
 	err := ui.App.SetFocus(ui.KeyvaultView).Run()
