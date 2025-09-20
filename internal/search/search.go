@@ -7,21 +7,23 @@ import (
 )
 
 type Oberservers interface {
-	NotifyFocus()
 	NotifyUpdate(content string)
 }
 
 type SearchView struct {
 	*tview.InputField
-	oberservers []Oberservers
+	FocusSecretsHandler func()
+	oberservers         []Oberservers
 }
 
 func (sv *SearchView) AddObserver(o Oberservers) {
 	sv.oberservers = append(sv.oberservers, o)
 }
 
-func NewSearchView() *SearchView {
-	search := &SearchView{}
+func NewSearchView(focusSecretsHandler func()) *SearchView {
+	search := &SearchView{
+		FocusSecretsHandler: focusSecretsHandler,
+	}
 	search.InputField = tview.NewInputField()
 	search.SetBorder(true)
 	search.SetTitle("Search")
@@ -34,10 +36,7 @@ func (sv *SearchView) AddSearchControls() {
 
 	sv.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyEnter {
-			//ui.App.SetFocus(ui.SecretsView)
-			for _, v := range sv.oberservers {
-				v.NotifyFocus()
-			}
+			sv.FocusSecretsHandler()
 			return nil
 		}
 		return event
