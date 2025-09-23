@@ -18,6 +18,10 @@ type CurrentKeyvaultWatcher interface {
 	CurrentKeyvaultUpdated(name, subscription string)
 }
 
+type Themer interface {
+	GetColor(color string) tcell.Color
+}
+
 type KeyvaultView struct {
 	*tview.List
 	Conf                    ConfigrationService
@@ -28,7 +32,7 @@ type KeyvaultView struct {
 	CurrentKeyvaultWatchers []CurrentKeyvaultWatcher
 }
 
-func NewKeyvaultView(cache CacheService, conf ConfigrationService, quiter, searcher, selecter func()) *KeyvaultView {
+func NewKeyvaultView(cache CacheService, conf ConfigrationService, quiter, searcher, selecter func(), theme Themer) *KeyvaultView {
 	keyvaultView := &KeyvaultView{
 		Cache:           cache,
 		Conf:            conf,
@@ -41,6 +45,9 @@ func NewKeyvaultView(cache CacheService, conf ConfigrationService, quiter, searc
 	keyvaultView.SetBorder(true)
 	keyvaultView.ShowSecondaryText(false)
 	keyvaultView.SetBorderPadding(0, 0, 1, 0)
+
+	keyvaultView.SetSelectedBackgroundColor(theme.GetColor("background"))
+	keyvaultView.SetSelectedTextColor(theme.GetColor("pink"))
 
 	for _, v := range cache.ReadKeyvaults() {
 		keyvaultView.AddItem(v.Name, v.SubscriptionId, rune(0), nil)

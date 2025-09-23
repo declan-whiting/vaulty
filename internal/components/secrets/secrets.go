@@ -23,9 +23,14 @@ type CacheService interface {
 	ReadSecrets(keyvault string) []models.SecretModel
 }
 
+type Themer interface {
+	GetColor(color string) tcell.Color
+	SetTableCellTheme(table *tview.Table, row int, col int, foreground, background string)
+}
+
 func NewSecretsView(cache CacheService,
 	quitHandler, searchHandler, backHandler func(),
-	selectedChangedHandler func(string, string, string)) *SecretsView {
+	selectedChangedHandler func(string, string, string), theme Themer) *SecretsView {
 	secretsView := &SecretsView{}
 	secretsView.Cache = cache
 	secretsView.Table = tview.NewTable()
@@ -36,8 +41,11 @@ func NewSecretsView(cache CacheService,
 	secretsView.SearchHandler = searchHandler
 	secretsView.BackHandler = backHandler
 	secretsView.SelectedSecretChangedHandler = selectedChangedHandler
-
 	secretsView.SetSelectable(true, false)
+
+	secretsView.SetSelectedStyle(tcell.StyleDefault.
+		Background(theme.GetColor("background")).
+		Foreground(theme.GetColor("pink")))
 
 	secretsView.AddSecretsControls()
 	secretsView.SecretSelectedChanged()
