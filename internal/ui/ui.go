@@ -30,6 +30,7 @@ type Ui struct {
 }
 
 func BuildUi() {
+	start := time.Now()
 	services := Services{}
 	services.Init()
 
@@ -44,7 +45,7 @@ func BuildUi() {
 	ui.KeyvaultView.SetInitialKeyvault()
 
 	ui.Events.AddNewEventObserver(ui.StatusView)
-	ui.Events.NewEvent("\U0001F308 UI Built Sucessfully", "")
+	events.TimedEventLog(start, "\U0001F308 UI Built Sucessfully", *ui.Events)
 
 	ui.App.SetRoot(ui.Grid, true)
 	err := ui.App.SetFocus(ui.KeyvaultView).Run()
@@ -115,17 +116,12 @@ func (ui *Ui) CloseSecretDetailsView(view *tview.TextView) {
 
 func (ui *Ui) HandleSecretsSelectedChanged(secret, keyvault, subscription string) {
 	ui.Grid.RemoveItem(ui.SecretsView)
-	start := time.Now()
+	defer events.TimedEventLog(time.Now(), fmt.Sprintf("\U0001F916 Got %s ", secret), *ui.Events)
 
 	secretText := ui.Services.AzureService.AzShowSecret(secret, keyvault, subscription)
 	details := secretDetails.CreateSecretsDetailView(fmt.Sprintf("%s/%s", keyvault, secret), secretText)
 	ui.App.SetFocus(details)
 	details.AddControls(ui.CloseSecretDetailsView)
-
-	elapsed := time.Since(start)
-	took := fmt.Sprintf("\nTook: %.1fs", elapsed.Seconds())
-	event := (fmt.Sprintf("\U0001F916 Got %s ", secret))
-	ui.Events.NewEvent(event, took)
 
 	ui.Grid.AddItem(details, 1, 1, 3, 2, 0, 0, false)
 }

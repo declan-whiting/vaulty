@@ -1,9 +1,9 @@
 package ui
 
 import (
-	"fmt"
 	"time"
 
+	"github.com/declan-whiting/vaulty/internal/events"
 	"github.com/declan-whiting/vaulty/internal/models"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -39,13 +39,12 @@ func (ui *Ui) ShowSearch() {
 func (ui *Ui) AddStatusControls() *Ui {
 	ui.Grid.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Rune() == rune(tcell.KeyCtrlR) {
+			start := time.Now()
 			ui.Events.NewEvent("\U0001F510 Synchronise Started", "Took: 0.1s")
 			var vaults []models.KeyvaultModel
-			start := time.Now()
-			elapsed := new(time.Duration)
-			var event, took string
 
 			go func() {
+				defer ui.App.QueueUpdateDraw(func() { events.TimedEventLog(start, "\U0001F510 Synchronise Finished", *ui.Events) })
 				config := ui.Services.ConfigrationService.GetConfiguration()
 
 				for _, v := range config.Keyvaults {
@@ -55,13 +54,6 @@ func (ui *Ui) AddStatusControls() *Ui {
 				for i, v := range vaults {
 					vaults[i].Secrets = ui.Services.AzureService.AzGetSecrets(v.Name, v.SubscriptionId)
 				}
-
-				ui.App.QueueUpdateDraw(func() {
-					*elapsed = time.Since(start)
-					took = fmt.Sprintf("\nTook: %.1fs", elapsed.Seconds())
-					event = (start.Format("\U0001F510 Synchronise Finished"))
-					ui.Events.NewEvent(event, took)
-				})
 			}()
 
 		}
